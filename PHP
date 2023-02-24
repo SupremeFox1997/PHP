@@ -1,0 +1,133 @@
+<?php 
+if (!defined("B_PROLOG_INCLUDED") || B_PROLOG_INCLUDED!==true) die();
+if (empty($arResult["CATEGORIES"])) return;
+?>
+<div class="bx_searche scrollblock scrollblock--thick">
+	<?php foreach ($arResult['CATEGORIES'] as $category_id => $arCategory): ?>
+    <?php foreach ($arCategory['ITEMS'] as $i => $arItem): ?>
+		<?php
+		// get the product information for the current search item
+		if ($arItem["MODULE_ID"] == "iblock" && $arItem["PARAM2"] == "1c_catalog" && !empty($arItem["ITEM_ID"]))
+		{
+			$arFilter = array(
+				"IBLOCK_ID" => $arItem["PARAM1"],
+				"ID" => $arItem["ITEM_ID"],
+				"ACTIVE" => "Y",
+				"CHECK_PERMISSIONS" => "Y",
+			);
+			$arSelect = array("ID", "IBLOCK_ID", "NAME", "DETAIL_PAGE_URL", "DETAIL_PICTURE");
+			$rsElements = CIBlockElement::GetList(array(), $arFilter, false, false, $arSelect);
+			if ($arElement = $rsElements->GetNext())
+			{
+				// get the image information for the product
+				if (!empty($arElement["DETAIL_PICTURE"]))
+				{
+					$arElement["PICTURE"] = CFile::GetFileArray($arElement["DETAIL_PICTURE"]);
+				}
+				elseif (!empty($arElement["PREVIEW_PICTURE"]))
+				{
+					$arElement["PICTURE"] = CFile::GetFileArray($arElement["PREVIEW_PICTURE"]);
+				}
+			}
+		}
+		?>
+        <a class="bx_item_block <?=($arItem["SELECTED"] ? "bx_active" : "")?>" href="<?=$arItem["URL"]?>">
+            <div class="maxwidth-theme">
+                <div class="bx_img_element">
+                    <?php if (!empty($arElement["PICTURE"])): ?>
+                        <img src="<?=$arElement["PICTURE"]["SRC"]?>" alt="<?=$arItem["NAME"]?>" title="<?=$arItem["NAME"]?>" />
+                    <?php else: ?>
+                        <img src="<?=SITE_TEMPLATE_PATH?>/images/svg/noimage_product.svg" alt="<?=$arItem["NAME"]?>" title="<?=$arItem["NAME"]?>" />
+                    <?php endif; ?>
+                </div>
+                <div class="bx_item_element">
+                    <span><?=$arItem["NAME"]?></span>
+                    <?php if ($category_id === "all"): ?>
+                        <span class="bx_item_section_name"><?=$arItem["MODULE_TITLE"]?></span>
+                    <?php endif; ?>
+                </div>
+                <div style="clear:both;"></div>
+            </div>
+        </a>
+    <?php endforeach; ?>
+<?php endforeach; ?>
+</div>
+                            <?php if($arPrice["DISCOUNT_VALUE"] < $arPrice["VALUE"]):?>
+                                <div class="price"><?=$arPrice["PRINT_DISCOUNT_VALUE"]?></div>
+                                <div class="price discount">
+                                    <strike><?=$arPrice["PRINT_VALUE"]?></strike>
+                                </div>
+                            <?php else: ?>
+                                <div class="price"><?=$arPrice["PRINT_VALUE"]?></div>
+                            <?php endif;?>
+                                </div>
+                </div>
+            </div>
+        <div class="search_no_offer">
+            <div class="search_no_offer_name"><a href="<?=$arElement["URL"]?>"><?=$arElement["NAME"]?></a></div>
+            <div class="search_no_offer_price">
+                <?php foreach($arElement["PRICES"] as $code=>$arPrice):?>
+    <?php if($arPrice["CAN_ACCESS"]):?>
+        <?php if (count($arElement["PRICES"])>1): ?>
+            <div class="search_price_wrap">
+                <div class="price_name"><?=$arResult["PRICES"][$code]["TITLE"];?></div>
+            </div>
+        <?php endif;?>
+    <?php endif;?>
+<?php endforeach;?>
+                        <?php if($arPrice["DISCOUNT_VALUE"] < $arPrice["VALUE"]):?> 
+
+                            <div class="price"><?=$arPrice["PRINT_DISCOUNT_VALUE"]?></div>
+                            <div class="price discount">
+                                <strike><?=$arPrice["PRINT_VALUE"]?></strike>
+                            </div>
+                        <?php else: ?>
+    <div class="price"><?= $arPrice["PRINT_VALUE"] ?></div>
+<?php endif; ?>
+    </div>
+            </div>
+        </div>
+						<?$sectionId = str_replace('S', '', $arItem["ITEM_ID"]);?>
+						<?if(isset($arResult["SECTIONS"][$sectionId])):?>
+							<?$arSection = $arResult["SECTIONS"][$sectionId];?>
+							<a class="bx_item_block" href="<?=$arItem["URL"]?>">
+								<div class="maxwidth-theme">
+									<div class="bx_img_element">
+										<?if(is_array($arSection["PICTURE"])):?>
+											<img src="<?=$arSection["PICTURE"]["src"]?>">
+										<?else:?>
+											<img src="<?=SITE_TEMPLATE_PATH?>/images/svg/noimage_product.svg" width="38" height="38">
+										<?endif;?>
+									</div>
+									<div class="bx_item_element">
+										<span class="font_sm"><?=$arItem["NAME"]?></span>
+										<?if($arItem['PARENT']):?>
+											<div class="item-parent font_sxs"><?=$arItem['PARENT']?></div>
+										<?endif;?>
+									</div>
+								</div>
+							</a>
+				<?elseif ($arItem['TYPE'] !== 'all'):?>
+					<a class="bx_item_block others_result" href="<?=$arItem["URL"]?>">
+						<div class="maxwidth-theme">
+							<div class="bx_item_element">
+								<span><?=$arItem["NAME"]?></span>
+								<?if($arItem['PARENT']):?>
+									<div class="item-parent font_sxs"><?=$arItem['PARENT']?></div>
+								<?endif;?>
+							</div>
+						</div>
+					</a>
+				<?endif;?>
+</div>
+
+<?if(isset($arResult["CATEGORIES"]['all']) ):?>
+	<?foreach($arResult["CATEGORIES"]['all']["ITEMS"] as $i => $arItem):?>
+		<div class="bx_item_block all_result">
+			<div class="bx_item_element">
+				<a class="all_result_title btn btn-transparent btn-wide round-ignore" href="<?=$arItem["URL"]?>"><?=$arItem["NAME"]?></a>
+			</div>
+			<div style="clear:both;"></div>
+		</div>
+	<?endforeach;?>
+<?endif;?>
